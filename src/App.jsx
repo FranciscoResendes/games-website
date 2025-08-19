@@ -1,6 +1,7 @@
 import { use, useState } from 'react'
 import { useNavigate, Routes, Route } from 'react-router-dom';
 import TicTacToeGame from './tic-tac-toe/TicTacToeGame'
+import SudokuGame from './sudoku/SudokuGame'
 import './App.css'
 
 function HomePage() {
@@ -12,6 +13,7 @@ function HomePage() {
       </div>
       <div className="card">
         <button onClick={() => navigate('/tic-tac-toe')}>tic-tac-toe</button>
+        <button onClick={() => navigate('/sudoku')}>sudoku</button>
       </div>
     </div>
   )
@@ -25,6 +27,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/tic-tac-toe" element={<TicTacToeGame />} />
+          <Route path="/sudoku" element={<SudokuGame />} />
         </Routes>
     </>
   )
