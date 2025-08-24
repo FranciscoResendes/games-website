@@ -1,31 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './SudokuGame.css';
 
 function SudokuGame() {
-  // Example: 9x9 grid with empty cells
-  const [grid, setGrid] = useState(Array(9).fill().map(() => Array(9).fill('')));
+  const [grid, setGrid] = useState([]);
 
-  const handleChange = (row, col, value) => {
-    const newGrid = grid.map(arr => arr.slice());
-    newGrid[row][col] = value.replace(/[^1-9]/, ''); // Only allow 1-9
-    setGrid(newGrid);
-  };
+  useEffect(() => {
+    fetch('http://localhost:8000/api/sudoku')
+      .then(res => res.json())
+      .then(data => setGrid(data.puzzle));
+  }, []);
 
   return (
-    <div className="sudoku-board">
-      {grid.map((row, rIdx) => (
-        <div className="sudoku-row" key={rIdx}>
-          {row.map((cell, cIdx) => (
-            <input
-              className="sudoku-cell"
-              key={cIdx}
-              value={cell}
-              maxLength={1}
-              onChange={e => handleChange(rIdx, cIdx, e.target.value)}
-            />
-          ))}
-        </div>
-      ))}
+    <div>
+      {/* Render your grid here */}
+      {grid.length > 0 && (
+        <pre>{JSON.stringify(grid, null, 2)}</pre>
+      )}
     </div>
   );
 }
