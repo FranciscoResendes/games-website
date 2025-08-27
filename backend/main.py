@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import random
 
 app = FastAPI()
 
@@ -24,5 +25,21 @@ def get_sudoku():
     [0, 6, 0, 0, 0, 0, 2, 8, 0],
     [0, 0, 0, 4, 1, 9, 0, 0, 5],
     [0, 0, 0, 0, 8, 0, 0, 7, 9]
-]
+    ]
     return {"puzzle": premade_board}
+
+def create_sudoku(fixed_cells=30):
+    board = [[0]*9 for _ in range(9)]
+    
+
+    nums = list(range(1, 10))
+    random.shuffle(nums)
+    board[0] = nums
+
+
+    cells = [(i, j) for i in range(9) for j in range(9)]
+    random.shuffle(cells)
+    for i, j in cells[:81 - fixed_cells]:
+        board[i][j] = 0
+
+    return board
