@@ -29,17 +29,32 @@ def get_sudoku():
     return {"puzzle": premade_board}
 
 def create_sudoku(fixed_cells=30):
-    board = [[0]*9 for _ in range(9)]
-    
+    board = [[0] * 9 for _ in range(9)]
 
-    nums = list(range(1, 10))
-    random.shuffle(nums)
-    board[0] = nums
-
-
-    cells = [(i, j) for i in range(9) for j in range(9)]
-    random.shuffle(cells)
-    for i, j in cells[:81 - fixed_cells]:
-        board[i][j] = 0
+    for num in range(0,9):
+        board[num] = list(range(1, 10))
+        random.shuffle(board[num])
 
     return board
+
+def isBoardValid(board):
+    def isValidRow(row):
+        if (set(row) == set(range(1,10))):
+            return True
+        return False
+    
+    def isValidColumn(col):
+        column = [board[row][col] for row in range(9)]
+        if (set(column) == set(range(1,10))):
+            return True
+        return False
+    
+
+    for row in board:
+        if not isValidRow(row):
+            return False
+    for col in range(0,9):
+        if not isValidColumn(col):
+            return False
+
+    return True
