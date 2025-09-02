@@ -49,6 +49,17 @@ def isBoardValid(board):
             return True
         return False
     
+    def isValidBox(box_row, box_col, board):
+        initial_row_idx = box_row - (box_row % 3)
+        initial_col_idx = box_col - (box_col % 3)
+        current_box = []
+
+        for i in range(initial_row_idx, initial_row_idx + 3):
+            for j in range(initial_col_idx, initial_col_idx + 3):
+                    current_box.append(board[i][j])
+        if (set(current_box) == set(range(1,10))):
+            return True
+        return False
 
     for row in board:
         if not isValidRow(row):
@@ -56,5 +67,9 @@ def isBoardValid(board):
     for col in range(0,9):
         if not isValidColumn(col):
             return False
+    for row in range(0, 9, 3):
+        for col in range(0, 9, 3):
+            if not isValidBox(row, col, board):
+                return False
 
     return True
