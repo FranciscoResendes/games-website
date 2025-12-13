@@ -105,37 +105,40 @@ function SudokuGame() {
   }, [selectedCell, userGrid]);
 
   return (
-    <div
-      className="sudoku-board"
-      ref={boardRef}
-      tabIndex={0}
-      onKeyDown={handleKeyDown}
-      style={{ outline: 'none' }}
-    >
-      {userGrid.map((row, rowIdx) => (
-        <div className="sudoku-row" key={rowIdx}>
-          {row.map((cell, colIdx) => {
-            const isFixed = grid[rowIdx][colIdx] !== 0;
-            const isSelected = selectedCell[0] === rowIdx && selectedCell[1] === colIdx;
-            return (
-              <input
-                className={`sudoku-cell${isSelected ? ' selected' : ''}${isFixed ? ' fixed' : ''}`}
-                key={colIdx}
-                id={`cell-${rowIdx}-${colIdx}`}
-                value={cell === 0 ? '' : cell}
-                disabled={isFixed}
-                tabIndex={isSelected ? 0 : -1}
-                onFocus={() => setSelectedCell([rowIdx, colIdx])}
-                onClick={() => setSelectedCell([rowIdx, colIdx])}
-                onChange={e => handleChange(rowIdx, colIdx, e.target.value)}
-                maxLength={1}
-                autoComplete="off"
-              />
-            );
-          })}
-        </div>
-      ))}
-    </div>
+    <>
+    <h1>Sudoku Game</h1>
+      <div
+        className="sudoku-board"
+        ref={boardRef}
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+        style={{ outline: 'none' }}
+      >
+        {userGrid.map((row, rowIdx) => (
+          <div className="sudoku-row" key={rowIdx}>
+            {row.map((cell, colIdx) => {
+              const isFixed = grid[rowIdx][colIdx] !== 0;
+              const isSelected = selectedCell[0] === rowIdx && selectedCell[1] === colIdx;
+              return (
+                <input
+                  className={`sudoku-cell${isSelected ? ' selected' : ''}${isFixed ? ' fixed' : ''}`}
+                  key={colIdx}
+                  id={`cell-${rowIdx}-${colIdx}`}
+                  value={cell === 0 ? '' : cell}
+                  disabled={isFixed}
+                  tabIndex={isSelected ? 0 : -1}
+                  onFocus={() => setSelectedCell([rowIdx, colIdx])}
+                  onClick={() => setSelectedCell([rowIdx, colIdx])}
+                  onChange={e => handleChange(rowIdx, colIdx, e.target.value)}
+                  maxLength={1}
+                  autoComplete="off"
+                />
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    </>
   );
 }
 

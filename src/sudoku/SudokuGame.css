@@ -62,3 +62,9 @@
 .sudoku-row .sudoku-cell:last-child {
   border-right-width: 3px;
 }
+
+h1 {
+  text-align: center;
+  margin-top: 1rem;
+  color: white;
+}
