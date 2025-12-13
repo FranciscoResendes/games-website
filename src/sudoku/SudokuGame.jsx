@@ -119,7 +119,7 @@ function SudokuGame() {
             const isSelected = selectedCell[0] === rowIdx && selectedCell[1] === colIdx;
             return (
               <input
-                className={`sudoku-cell${isSelected ? ' selected' : ''}`}
+                className={`sudoku-cell${isSelected ? ' selected' : ''}${isFixed ? ' fixed' : ''}`}
                 key={colIdx}
                 id={`cell-${rowIdx}-${colIdx}`}
                 value={cell === 0 ? '' : cell}

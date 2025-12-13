@@ -1,18 +1,64 @@
 .sudoku-board {
-  display: grid;
-  grid-template-rows: repeat(9, 1fr);
-  gap: 2px;
+  display: flex;
+  flex-direction: column;
   margin: 2rem auto;
   width: fit-content;
+  background: #000;
+  padding: 2px;
+  border-radius: 6px;
 }
 .sudoku-row {
-  display: grid;
-  grid-template-columns: repeat(9, 1fr);
-  gap: 2px;
+  display: flex;
 }
 .sudoku-cell {
-  width: 2rem;
-  height: 2rem;
+  width: 2.2rem;
+  height: 2.2rem;
   text-align: center;
   font-size: 1.2rem;
+  background: #fff;
+  border: 1px solid #000;
+  outline: none;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  transition: box-shadow 0.1s;
+  color: #000;
+}
+.sudoku-cell.selected {
+  box-shadow: 0 0 0 2px #1976d2;
+  z-index: 1;
+}
+/* Fixed (given) cells */
+.sudoku-cell.fixed {
+  background: #e0e0e0;
+  font-weight: bold;
+  color: #333;
+  cursor: default;
+}
+/* Thick borders for 3x3 blocks */
+.sudoku-cell {
+  border-top-width: 1px;
+  border-left-width: 1px;
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+}
+.sudoku-row:first-child .sudoku-cell {
+  border-top-width: 3px;
+}
+.sudoku-row .sudoku-cell:first-child {
+  border-left-width: 3px;
+}
+.sudoku-row .sudoku-cell:nth-child(3),
+.sudoku-row .sudoku-cell:nth-child(6) {
+  border-right-width: 3px;
+}
+.sudoku-row:nth-child(3) .sudoku-cell,
+.sudoku-row:nth-child(6) .sudoku-cell {
+  border-bottom-width: 3px;
+}
+.sudoku-row:last-child .sudoku-cell {
+  border-bottom-width: 3px;
+}
+.sudoku-row .sudoku-cell:last-child {
+  border-right-width: 3px;
 }
