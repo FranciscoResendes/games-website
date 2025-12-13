@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './SudokuGame.css';
 
 function SudokuGame() {
   const [grid, setGrid] = useState([]);
   const [userGrid, setUserGrid] = useState([]);
+  const [selectedCell, setSelectedCell] = useState([0, 0]); // [row, col]
+  const boardRef = useRef(null);
 
   useEffect(() => {
     fetch('http://localhost:8000/api/sudoku')
@@ -14,6 +16,7 @@ function SudokuGame() {
       });
   }, []);
 
+
   const handleChange = (rowIdx, colIdx, value) => {
     if (!/^[1-9]?$/.test(value)) return; // Only allow 1-9 or empty
     const newGrid = userGrid.map(row => row.slice());
@@ -21,20 +24,112 @@ function SudokuGame() {
     setUserGrid(newGrid);
   };
 
+  // Keyboard navigation and input
+  const handleKeyDown = (e) => {
+    const [row, col] = selectedCell;
+    if (!userGrid.length) return;
+    const maxRow = userGrid.length - 1;
+    const maxCol = userGrid[0].length - 1;
+    const isFixed = grid[row][col] !== 0;
+
+    // Tab navigation
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      let nextRow = row, nextCol = col;
+      if (e.shiftKey) {
+        // Move backward
+        if (col === 0) {
+          nextCol = maxCol;
+          nextRow = row === 0 ? maxRow : row - 1;
+        } else {
+          nextCol = col - 1;
+        }
+      } else {
+        // Move forward
+        if (col === maxCol) {
+          nextCol = 0;
+          nextRow = row === maxRow ? 0 : row + 1;
+        } else {
+          nextCol = col + 1;
+        }
+      }
+      setSelectedCell([nextRow, nextCol]);
+      return;
+    }
+
+    // Arrow keys navigation
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSelectedCell([row === 0 ? maxRow : row - 1, col]);
+      return;
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSelectedCell([row === maxRow ? 0 : row + 1, col]);
+      return;
+    }
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      setSelectedCell([row, col === 0 ? maxCol : col - 1]);
+      return;
+    }
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      setSelectedCell([row, col === maxCol ? 0 : col + 1]);
+      return;
+    }
+
+    // Number input (1-9)
+    if (/^[1-9]$/.test(e.key) && !isFixed) {
+      const newGrid = userGrid.map(r => r.slice());
+      newGrid[row][col] = Number(e.key);
+      setUserGrid(newGrid);
+      return;
+    }
+
+    // Backspace/Delete to clear
+    if ((e.key === 'Backspace' || e.key === 'Delete') && !isFixed) {
+      const newGrid = userGrid.map(r => r.slice());
+      newGrid[row][col] = 0;
+      setUserGrid(newGrid);
+      return;
+    }
+  };
+
+  // Focus the selected cell when it changes
+  useEffect(() => {
+    if (!userGrid.length) return;
+    const [row, col] = selectedCell;
+    const cell = document.getElementById(`cell-${row}-${col}`);
+    if (cell) cell.focus();
+  }, [selectedCell, userGrid]);
+
   return (
-    <div className="sudoku-board">
+    <div
+      className="sudoku-board"
+      ref={boardRef}
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+      style={{ outline: 'none' }}
+    >
       {userGrid.map((row, rowIdx) => (
         <div className="sudoku-row" key={rowIdx}>
           {row.map((cell, colIdx) => {
             const isFixed = grid[rowIdx][colIdx] !== 0;
+            const isSelected = selectedCell[0] === rowIdx && selectedCell[1] === colIdx;
             return (
               <input
-                className="sudoku-cell"
+                className={`sudoku-cell${isSelected ? ' selected' : ''}`}
                 key={colIdx}
+                id={`cell-${rowIdx}-${colIdx}`}
                 value={cell === 0 ? '' : cell}
                 disabled={isFixed}
+                tabIndex={isSelected ? 0 : -1}
+                onFocus={() => setSelectedCell([rowIdx, colIdx])}
+                onClick={() => setSelectedCell([rowIdx, colIdx])}
                 onChange={e => handleChange(rowIdx, colIdx, e.target.value)}
                 maxLength={1}
+                autoComplete="off"
               />
             );
           })}
