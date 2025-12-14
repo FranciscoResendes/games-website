@@ -1,3 +1,36 @@
+h1 {
+  text-align: center;
+  margin-top: 1rem;
+  color: white;
+}
+
+.sudoku-message {
+  margin-bottom: 1rem;
+  font-weight: bold;
+  color: #fff;
+  text-align: center;
+}
+
+.sudoku-restart-btn {
+  display: block;
+  margin: 0 auto 1rem auto;
+  padding: 0.5rem 1.5rem;
+  font-size: 1rem;
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+.sudoku-restart-btn:hover {
+  background: #125ea2;
+}
+
+.sudoku-board-outline {
+  outline: none;
+}
 .sudoku-board {
   display: flex;
   flex-direction: column;

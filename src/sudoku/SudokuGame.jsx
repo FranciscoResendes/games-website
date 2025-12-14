@@ -186,13 +186,12 @@ function SudokuGame() {
   return (
     <>
       <h1>Sudoku Game</h1>
-      {message && <div style={{ marginBottom: '1rem', fontWeight: 'bold', color: '#fff' }}>{message}</div>}
+      {message && <div className="sudoku-message">{message}</div>}
       <div
-        className="sudoku-board"
+        className="sudoku-board sudoku-board-outline"
         ref={boardRef}
         tabIndex={0}
         onKeyDown={handleKeyDown}
-        style={{ outline: 'none' }}
       >
         {userGrid.map((row, rowIdx) => (
           <div className="sudoku-row" key={rowIdx}>
@@ -218,7 +217,7 @@ function SudokuGame() {
           </div>
         ))}
       </div>
-      <button onClick={handleRestart} style={{ marginBottom: '1rem' }}>Restart</button>
+      <button className="sudoku-restart-btn" onClick={handleRestart}>Restart</button>
     </>
   );
 }
