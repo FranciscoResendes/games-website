@@ -1,3 +1,7 @@
+  // Navigate to main page
+  const handleGoHome = () => {
+    window.location.href = '/';
+  };
 import { useState, useEffect, useRef } from 'react';
 
 import './SudokuGame.css';
@@ -140,6 +144,7 @@ function SudokuGame() {
 
   return (
     <>
+      <button className="sudoku-nav-btn" onClick={handleGoHome}>Back to Main Page</button>
       <h1>Sudoku Game</h1>
       {message && <div className="sudoku-message">{message}</div>}
       <div
