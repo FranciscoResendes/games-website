@@ -1,3 +1,7 @@
+// Navigation to main page
+function handleGoHome() {
+  window.location.href = '/';
+}
 import { useState } from 'react'
 import './App.css'
 
@@ -34,6 +38,7 @@ function App() {
 
   return (
     <>
+      <button className="ttt-nav-btn" onClick={handleGoHome}>Back to Main Page</button>
       <div>
         <h1>Tic Tac Toe</h1>
         <h3>Current Player: {currentPlayer}</h3>
