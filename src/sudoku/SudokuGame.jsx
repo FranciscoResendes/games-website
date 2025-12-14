@@ -3,149 +3,132 @@ import { useState, useEffect, useRef } from 'react';
 import './SudokuGame.css';
 import { isValidSudoku } from './sudokuValidator';
 
+
 function SudokuGame() {
   const [grid, setGrid] = useState([]);
   const [userGrid, setUserGrid] = useState([]);
-  const [selectedCell, setSelectedCell] = useState([0, 0]); // [row, col]
+  const [selectedCell, setSelectedCell] = useState([0, 0]);
   const [gameOver, setGameOver] = useState(false);
   const [message, setMessage] = useState('');
   const boardRef = useRef(null);
 
+  // Fetch puzzle on mount
   useEffect(() => {
     fetch('http://localhost:8000/api/sudoku')
       .then(res => res.json())
       .then(data => {
         setGrid(data.puzzle);
-        setUserGrid(data.puzzle.map(row => row.slice())); // Deep copy for user edits
+        setUserGrid(data.puzzle.map(row => row.slice()));
       });
   }, []);
 
-
-
+  // Handle cell value change
   const handleChange = (rowIdx, colIdx, value) => {
-    if (gameOver) return;
-    if (!/^[1-9]?$/.test(value)) return; // Only allow 1-9 or empty
-    const newGrid = userGrid.map(row => row.slice());
-    newGrid[rowIdx][colIdx] = value === '' ? 0 : Number(value);
-    setUserGrid(newGrid);
+    if (gameOver || !/^[1-9]?$/.test(value)) return;
+    setUserGrid(prev => {
+      const newGrid = prev.map(row => row.slice());
+      newGrid[rowIdx][colIdx] = value === '' ? 0 : Number(value);
+      return newGrid;
+    });
   };
 
-
   // Check if all non-fixed cells are filled
-  useEffect(() => {
-    if (!userGrid.length || !grid.length || gameOver) return;
-    let allFilled = true;
+  const allNonFixedFilled = () => {
     for (let i = 0; i < 9; i++) {
       for (let j = 0; j < 9; j++) {
-        if (grid[i][j] === 0 && userGrid[i][j] === 0) {
-          allFilled = false;
-          break;
-        }
+        if (grid[i][j] === 0 && userGrid[i][j] === 0) return false;
       }
-      if (!allFilled) break;
     }
-    if (allFilled) {
-      // Validate
-      if (isValidSudoku(userGrid)) {
-        setMessage('Congratulations! You solved the puzzle!');
-      } else {
-        setMessage('Sorry, the solution is not correct.');
-      }
-      setGameOver(true);
-    }
+    return true;
+  };
+
+  // Validate and finish game if board is filled
+  useEffect(() => {
+    if (!userGrid.length || !grid.length || gameOver) return;
+    if (!allNonFixedFilled()) return;
+    setGameOver(true);
+    setMessage(isValidSudoku(userGrid)
+      ? 'Congratulations! You solved the puzzle!'
+      : 'Sorry, the solution is not correct.');
   }, [userGrid, grid, gameOver]);
 
   // Restart: clear all non-fixed cells
   const handleRestart = () => {
     if (!grid.length) return;
-    const cleared = userGrid.map((row, i) =>
+    setUserGrid(userGrid.map((row, i) =>
       row.map((cell, j) => (grid[i][j] === 0 ? 0 : cell))
-    );
-    setUserGrid(cleared);
+    ));
     setGameOver(false);
     setMessage('');
   };
 
   // Keyboard navigation and input
   const handleKeyDown = (e) => {
-    if (gameOver) return;
+    if (gameOver || !userGrid.length) return;
     const [row, col] = selectedCell;
-    if (!userGrid.length) return;
     const maxRow = userGrid.length - 1;
     const maxCol = userGrid[0].length - 1;
     const isFixed = grid[row][col] !== 0;
 
-    // Tab navigation
-    if (e.key === 'Tab') {
-      e.preventDefault();
-      let nextRow = row, nextCol = col;
-      if (e.shiftKey) {
-        // Move backward
-        if (col === 0) {
-          nextCol = maxCol;
-          nextRow = row === 0 ? maxRow : row - 1;
+    // Navigation helpers
+    const move = (r, c) => setSelectedCell([r, c]);
+
+    switch (e.key) {
+      case 'Tab': {
+        e.preventDefault();
+        let [nextRow, nextCol] = [row, col];
+        if (e.shiftKey) {
+          if (col === 0) {
+            nextCol = maxCol;
+            nextRow = row === 0 ? maxRow : row - 1;
+          } else {
+            nextCol = col - 1;
+          }
         } else {
-          nextCol = col - 1;
+          if (col === maxCol) {
+            nextCol = 0;
+            nextRow = row === maxRow ? 0 : row + 1;
+          } else {
+            nextCol = col + 1;
+          }
         }
-      } else {
-        // Move forward
-        if (col === maxCol) {
-          nextCol = 0;
-          nextRow = row === maxRow ? 0 : row + 1;
-        } else {
-          nextCol = col + 1;
-        }
+        move(nextRow, nextCol);
+        break;
       }
-      setSelectedCell([nextRow, nextCol]);
-      return;
-    }
-
-    // Arrow keys navigation
-    if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      setSelectedCell([row === 0 ? maxRow : row - 1, col]);
-      return;
-    }
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      setSelectedCell([row === maxRow ? 0 : row + 1, col]);
-      return;
-    }
-    if (e.key === 'ArrowLeft') {
-      e.preventDefault();
-      setSelectedCell([row, col === 0 ? maxCol : col - 1]);
-      return;
-    }
-    if (e.key === 'ArrowRight') {
-      e.preventDefault();
-      setSelectedCell([row, col === maxCol ? 0 : col + 1]);
-      return;
-    }
-
-    // Number input (1-9)
-    if (/^[1-9]$/.test(e.key) && !isFixed) {
-      const newGrid = userGrid.map(r => r.slice());
-      newGrid[row][col] = Number(e.key);
-      setUserGrid(newGrid);
-      return;
-    }
-
-    // Backspace/Delete to clear
-    if ((e.key === 'Backspace' || e.key === 'Delete') && !isFixed) {
-      const newGrid = userGrid.map(r => r.slice());
-      newGrid[row][col] = 0;
-      setUserGrid(newGrid);
-      return;
+      case 'ArrowUp':
+        e.preventDefault();
+        move(row === 0 ? maxRow : row - 1, col);
+        break;
+      case 'ArrowDown':
+        e.preventDefault();
+        move(row === maxRow ? 0 : row + 1, col);
+        break;
+      case 'ArrowLeft':
+        e.preventDefault();
+        move(row, col === 0 ? maxCol : col - 1);
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        move(row, col === maxCol ? 0 : col + 1);
+        break;
+      default:
+        // Number input (1-9)
+        if (/^[1-9]$/.test(e.key) && !isFixed) {
+          handleChange(row, col, e.key);
+        }
+        // Backspace/Delete to clear
+        if ((e.key === 'Backspace' || e.key === 'Delete') && !isFixed) {
+          handleChange(row, col, '');
+        }
+        break;
     }
   };
 
-  // Focus the selected cell when it changes, but skip fixed cells
+  // Focus the selected cell when it changes, allow navigation even on fixed cells
   useEffect(() => {
     if (!userGrid.length) return;
     const [row, col] = selectedCell;
-    const isFixed = grid[row]?.[col] !== undefined && grid[row][col] !== 0;
-    if (isFixed || gameOver) {
-      // If fixed or game over, blur any active element
+    if (gameOver) {
       if (document.activeElement && document.activeElement.tagName === 'INPUT') {
         document.activeElement.blur();
       }
