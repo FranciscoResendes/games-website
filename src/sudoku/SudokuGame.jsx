@@ -14,6 +14,35 @@ function SudokuGame() {
   const [selectedCell, setSelectedCell] = useState([0, 0]);
   const [gameOver, setGameOver] = useState(false);
   const [message, setMessage] = useState('');
+  const [hint, setHint] = useState(null);
+    // Request a hint from the backend
+    const handleHint = async () => {
+      if (gameOver) return;
+      setHint(null);
+      try {
+        const res = await fetch('http://localhost:8000/api/sudoku/hint', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ board: userGrid })
+        });
+        const data = await res.json();
+        if (data.hint && data.hint.row !== undefined && data.hint.col !== undefined) {
+          setHint(data.hint);
+          // Optionally fill the cell with the hint value
+          setUserGrid(prev => {
+            const newGrid = prev.map(row => row.slice());
+            newGrid[data.hint.row][data.hint.col] = data.hint.value;
+            return newGrid;
+          });
+          setMessage(data.hint.explanation);
+        } else {
+          setHint(null);
+          setMessage(data.explanation || 'No hint available.');
+        }
+      } catch (err) {
+        setMessage('Error getting hint.');
+      }
+    };
   const boardRef = useRef(null);
 
   // Fetch puzzle on mount
@@ -145,6 +174,7 @@ function SudokuGame() {
   return (
     <>
       <button className="sudoku-nav-btn" onClick={handleGoHome}>Back to Main Page</button>
+      <button className="sudoku-hint-btn" onClick={handleHint} disabled={gameOver} style={{marginLeft: '1rem'}}>Hint</button>
       <h1>Sudoku Game</h1>
       {message && <div className="sudoku-message">{message}</div>}
       <div
@@ -177,6 +207,9 @@ function SudokuGame() {
           </div>
         ))}
       </div>
+        {message && (
+          <div className="sudoku-hint-message">{message}</div>
+        )}
       <button className="sudoku-restart-btn" onClick={handleRestart}>Restart</button>
     </>
   );
